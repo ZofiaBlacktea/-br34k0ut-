@@ -32,7 +32,7 @@ loadSprite("tuile","images/tuile.png")
 loadSprite("coeur","images/coeur.png")
 
 // charger les sons
-loadSound("musique", "audio/before_the_dawn.ogg")
+loadSound("musique", "audio/nyanuwu.ogg")
 loadSound("reussite", "audio/reussite.wav")
 loadSound("echec", "audio/echec.wav")
 
@@ -224,10 +224,19 @@ scene("jeu",() => {
 
 	// gérer les collisions
 	// avec le paddle
+	let compteur = 0;
 	ball.onCollide("paddle", (p) => {
 		vitesse += 60
 		// renvoyer la balle avec le bon angle
-		ball.velocite = dir(ball.pos.angle(p.pos))
+		ball.velocite = dir(ball.pos.angle(p.pos));
+		
+		compteur+=1;
+		// Si la balle a touché deux fois la palette
+		if (compteur == 2) {
+
+		};
+
+		
 	})
 	// avec tous les types de briques
 	// grâce à l'identifiant "brique"
