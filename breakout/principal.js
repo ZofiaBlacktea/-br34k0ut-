@@ -22,8 +22,28 @@ kaboom({
 	height : 800
 })
 
+
+// List of built-in fonts ("o" at the end means the outlined version)
+const builtinFonts = [
+	"apl386o",
+	"apl386",
+	"sinko",
+	"sink",
+]
+
+const fonts = [
+	...builtinFonts
+]
+
+// Keep track which is the current font
+let curFont = 0
+let curSize = 48
+const pad = 24
+
 let palet;
 let mur = 0;
+let errorScreen = null;
+let bear = null;
 
 // définir un chemin racine pour les ressources
 // Ctte étape est facultative, elle sert juste
@@ -81,7 +101,17 @@ scene("accueil", () => {
 		// créer un objet texte
 		// le second paramètre permet de modifier son style
 		text("Appuyez sur la barre d'espace pour jouer !",{
-			width : 600
+			font: fonts[curFont],
+			// The height of character
+			size: curSize,
+			// Transform each character for special effects
+			transform: (idx, ch) => ({
+				color: hsl2rgb((time() * 0.2 + idx * 0.1) % 1, 0.7, 0.8),
+				pos: vec2(0, wave(-4, 4, time() * 4 + idx * 0.5)),
+				scale: wave(1, 1.2, time() * 3 + idx),
+				angle: wave(-9, 9, time() * 3 + idx),
+			}),
+			width : 600,
 		}),
 		// placer le point d'accroche au centre
 		origin("center"),
@@ -141,7 +171,7 @@ scene("jeu",() => {
 	// score à zéro et vies à 3
 	let score = 0
 	let vies = 3
-	let vitesse = 800;
+	let vitesse = 500;
 	// dessiner un niveau
 	addLevel([
 		"========",
@@ -196,8 +226,16 @@ scene("jeu",() => {
 	// le texte pour le score
 	add([
 		text(score,{
-			font : "sink",
-			size : 48
+			font: fonts[curFont],
+			// The height of character
+			size: curSize,
+			// Transform each character for special effects
+			transform: (idx, ch) => ({
+				color: hsl2rgb((time() * 0.2 + idx * 0.1) % 1, 0.7, 0.8),
+				pos: vec2(0, wave(-4, 4, time() * 4 + idx * 0.5)),
+				scale: wave(1, 1.2, time() * 3 + idx),
+				angle: wave(-9, 9, time() * 3 + idx),
+			}),
 		}),
 		pos(100,100),
 		origin("center"),
@@ -294,10 +332,10 @@ scene("jeu",() => {
 				shake(30)
 				play("echec")
 				// réinitialiser la balle, sa vitesse, etc.
-				ball.pos.x = width()/2
-				ball.pos.y = height()-55
+				ball.pos.x = 110 - width()
+				ball.pos.y = height()/2
 				vitesse = 320
-				ball.velocite = dir(rand(220,290))
+				ball.velocite = dir(10)
 				// diminuer les vies
 				vies--
 				// s'il n'y en a plus...
@@ -328,9 +366,9 @@ scene("jeu",() => {
 				play("echec")
 				// réinitialiser la balle, sa vitesse, etc.
 				ball.pos.x = width()/2
-				ball.pos.y = height()-55
+				ball.pos.y = 110 - height()
 				vitesse = 320
-				ball.velocite = dir(rand(220,290))
+				ball.velocite = dir(80)
 				// diminuer les vies
 				vies--
 				// s'il n'y en a plus...
@@ -360,10 +398,10 @@ scene("jeu",() => {
 				shake(30)
 				play("echec")
 				// réinitialiser la balle, sa vitesse, etc.
-				ball.pos.x = width()/2
-				ball.pos.y = height()-55
+				ball.pos.x = width() - 55
+				ball.pos.y = height()/2
 				vitesse = 320
-				ball.velocite = dir(rand(220,290))
+				ball.velocite = dir(190)
 				// diminuer les vies
 				vies--
 				// s'il n'y en a plus...
@@ -431,13 +469,17 @@ scene("jeu",() => {
 		switch(malus){
 			case 0:
 				running = 1;
-				errorScreen = blueScreenOfDeathSpawn()
-				wait(.5, () => kill(errorScreen))
+				if(errorScreen == null){
+					errorScreen = blueScreenOfDeathSpawn()
+					wait(.5, () => kill(errorScreen))
+				}
 				break;
 			case 1:
 				running = 1;
-				bear = polarBearSpawn();
-				wait(.5, () => kill(bear));
+				if(bear == null){
+					bear = polarBearSpawn();
+					wait(.5, () => kill(bear));
+				}
 				break;
 		}
 		b.destroy()
@@ -459,7 +501,7 @@ function blueScreenOfDeathSpawn(){
 			sprite("blueScreen"),
 			origin("center"),
 			pos(width()/2,height()/2),
-			scale(.2),
+			scale(.4),
 		])
 
 	return errorScreen;
@@ -482,7 +524,8 @@ function polarBearSpawn(){
 function kill(object){
 	console.log('destroying object');
 	object.destroy();
-	return 0;
+	bear = null;
+	errorScreen = null;
 }
 
 function moveBonus(bonusObj, wall){
@@ -508,7 +551,21 @@ function moveBonus(bonusObj, wall){
 // déclaration de la scène d'échec
 scene("ohno", ({score}) => {
 	add([
-		text(`Vous avez perdu... \net fait ${score} points !`, {width : width()}),
+		sprite("bckg"),
+		pos(0,0),
+	]);
+	add([
+		text(`Vous avez perdu... \net fait ${score} points !`, {width : width(),
+			font: fonts[curFont],
+			// The height of character
+			size: curSize,
+			// Transform each character for special effects
+			transform: (idx, ch) => ({
+				color: hsl2rgb((time() * 0.2 + idx * 0.1) % 1, 0.7, 0.8),
+				pos: vec2(0, wave(-4, 4, time() * 4 + idx * 0.5)),
+				scale: wave(1, 1.2, time() * 3 + idx),
+				angle: wave(-9, 9, time() * 3 + idx),
+			}),}),
 		origin("center"),
 		pos(center()),
 	]);
