@@ -133,7 +133,7 @@ scene("jeu",() => {
 		]
 	})
 	// le palet
-	const palet = add([
+	let palet = add([
 		pos(vec2(width()/2 - 40, height()-40)),
 		rect(120, 20),
 		outline(4),
@@ -233,11 +233,14 @@ scene("jeu",() => {
 		compteur+=1;
 		// Si la balle a touché deux fois la palette
 		if (compteur == 2) {
-
+			// Générer un nombre entre 0 et 3
+			let x = randi(0, 4);
+			// appeler la fonction de changement de mur avec ce chiffre
+			deplacerPalette(x);
 		};
-
 		
 	})
+
 	// avec tous les types de briques
 	// grâce à l'identifiant "brique"
 	ball.onCollide("brique", (b) => {
@@ -261,6 +264,33 @@ scene("jeu",() => {
 		ball.velocite = dir(ball.pos.angle(b.pos)) */
 	})
 })
+
+// Définir la fonction deplacerPalette
+function deplacerPalette(x) {
+	// Si x pair, murs horizontaux
+	if (x%2 == 0) {
+		// Dessiner la palette pour qu'elle soit horizontale
+		palet.rect = (120, 20);
+		// la placer en haut si x=2 et en bas si x=0
+		if (x == 2) {
+			palet.pos = (vec2(width()/2 + 40, height()+40));
+		} else {
+			palet.pos = (vec2(width()/2 - 40, height()-40));
+		};
+	// Si x impair, murs verticaux
+	} else if (x%2 == 1){
+		// Dessinner la palette verticalement
+		palet.rect= (20, 120);
+		// la placer à gauche si x=1 et droite si x=2
+		if (x == 1) {
+			//palet.pos = (vec2(), );
+		} else {
+
+		}
+	}
+	// Retourner la valeur entre 0 et 3
+	return(x);
+}
 
 // déclaration de la scène d'échec
 scene("ohno", ({score}) => {
