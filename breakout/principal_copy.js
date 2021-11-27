@@ -22,6 +22,10 @@ kaboom({
 	height : 800
 })
 
+let palet;
+let errorScreen;
+let bear;
+
 // définir un chemin racine pour les ressources
 // Ctte étape est facultative, elle sert juste
 // à raccourcir les chemins suivants
@@ -30,6 +34,8 @@ loadRoot("assets/")
 // charger les images
 loadSprite("tuile","images/tuile.png")
 loadSprite("coeur","images/coeur.png")
+loadSprite("bckg", "images/background/tiled.png")
+loadSprite("title", "images/title.gif")
 //malus
 loadSprite("blueScreen","images/malus/blueScreen.png")
 loadSprite("bear","images/malus/polar_bear.gif")
@@ -62,35 +68,28 @@ scene("accueil", () => {
 	// lancer la musique
 	const musique = play("musique")
 	add([
+		sprite("bckg"),
+		pos(0,0),
+	]);
+
+	add([
+		sprite("title"),
+		origin("center"),
+		pos(width()/2, 300),
+	]);
+
+	add([
 		// créer un objet texte
 		// le second paramètre permet de modifier son style
 		text("Appuyez sur la barre d'espace pour jouer !",{
-			width : 800
+			width : 600
 		}),
 		// placer le point d'accroche au centre
 		origin("center"),
 		// placer le texte au centre
-		pos(center()),
+		pos(width()/2,600),
 	]);
-	// ajout de plusieurs textes affichés aléatoirement
-	// ici, on lancer une boucle tooutes les ½ secondes
-	loop(0.5, () => {
-		add([
-			// le texte est tiré aléatoirement dans ce tableau
-			text(choose(["UNIL","EPFL","SLI","CDH","GAMELAB","Lettres"]),{
-				width : 800,
-				font : "sink",
-				size : 48
-			}),
-			// la couleur est ajoutée en rgb (red, green, blue)
-			// on tire à chaque fois nombre entre 0 et 255
-			// randi() garantit qu'il s'agit d'un entier
-			// au contraire de rand()
-			color(randi(0,255),randi(0,255),randi(0,255)),
-			origin("center"),
-			pos(randi(0,width()),randi(height()-10,height()-200)),
-		]);
-	})
+
 
 	// ajout d'un événement pour lancer l'autre scène
 	onKeyPress("space",() =>{
@@ -100,8 +99,51 @@ scene("accueil", () => {
 	})
 })
 
+// Définir la fonction deplacerPalette
+function deplacerPalette(x) {
+	// Si x pair, murs horizontaux
+	if (x%2 == 0) {
+		// Dessiner la palette pour qu'elle soit horizontale
+			palet.width = 120;
+			palet.height = 20;
+		// Lier le mouvement de la palette à l'axe x
+		onUpdate("paddle", (p) => {
+			p.pos.x = mousePos().x;
+		})
+
+		// la placer en haut si x=2 et en bas si x=0
+		if (x == 2) {
+			palet.pos = (vec2(width()/2 + 40, height()+40));
+		} else {
+			palet.pos = (vec2(width()/2 - 40, height()-40));
+		};
+	// Si x impair, murs verticaux
+	} else if (x%2 == 1){
+		// Dessinner la palette verticalement
+			palet.width = 20;
+			palet.height = 120;
+		// Lier le mouvement de la palette à l'axe y
+		onUpdate("paddle", (p) => {
+			p.pos.y = mousePos().y;
+		})
+
+		// la placer à gauche si x=1 et droite si x=2
+		if (x == 1) {
+			palet.pos = (vec2(width()-40, height()/2 - 40));
+		} else {
+			palet.pos = (vec2(width()+40, height()/2 + 40));
+		}
+	}
+	// Retourner la valeur entre 0 et 3
+	return(x);
+}
+
 // déclaration de la scène de jeu
 scene("jeu",() => {
+	add([
+		sprite("bckg"),
+		pos(0,0),
+	]);
 	// initialisation des variables globales
 	// score à zéro et vies à 3
 	let score = 0
@@ -109,14 +151,14 @@ scene("jeu",() => {
 	let vitesse = 800;
 	// dessiner un niveau
 	addLevel([
-		"========",
-		"==x=====",
-		"==x=====",
-		"======x=",
-		"========",
-		"========",
-		"=xxx=x==",
-		"========",
+		"x======x",
+		"x=x====x",
+		"x=x====x",
+		"x=====xx",
+		"x======x",
+		"x======x",
+		"xxxx=x=x",
+		"xxxxxxxx",
 	], {
 		// définir la taille de chaque élément
 		width : 50,
@@ -149,7 +191,7 @@ scene("jeu",() => {
 		]
 	})
 	// le palet
-	let palet = add([
+	palet = add([
 		pos(vec2(width()/2 - 40, height()-40)),
 		rect(120, 20),
 		outline(4),
@@ -253,6 +295,8 @@ scene("jeu",() => {
 			let x = randi(0, 4);
 			// appeler la fonction de changement de mur avec ce chiffre
 			deplacerPalette(x);
+			// réinitialiser le compteur
+			compteur = 0;
 		};
 		
 	})
@@ -260,6 +304,7 @@ scene("jeu",() => {
 	// avec tous les types de briques
 	// grâce à l'identifiant "brique"
 	ball.onCollide("brique", (b) => {
+		console.log("ball.onCollide brique");
 		let sfx = randi(0,4)
 		switch(sfx){
 			case 0:
@@ -283,93 +328,63 @@ scene("jeu",() => {
 	// avec les briques spéciales
 	// grâce à l'identifiant "special"
 	ball.onCollide("special", (b) => {
+		console.log("ball.onCollide special");
 		let malus = randi(0,2)
 		switch(malus){
 			case 0:
-				blueScreenOfDeath(1000);
+				running = 1;
+				errorScreen = blueScreenOfDeathSpawn()
+				wait(.5, () => kill(errorScreen))
 				break;
 			case 1:
-				polarBear(1000);
+				running = 1;
+				bear = polarBearSpawn();
+				wait(.5, () => kill(bear));
 				break;
 		}
 		b.destroy()
+		/* // Kaboom ne gère que le rgb, mais des fonctions
+		// de conversions nous permettent d'utiliser du hsl !
+		palet.color = hsl2rgb((time() * 0.2 + 1 * 0.1) % 1, 0.7, 0.8)
+		// transformer aléatoirement la taille du palet
+		palet.width = randi(50,200)
+		palet.height = randi(20,100)
+		ball.velocite = dir(ball.pos.angle(b.pos)) */
 	})
 })
 
-// Définir la fonction deplacerPalette
-function deplacerPalette(x) {
-	// Si x pair, murs horizontaux
-	if (x%2 == 0) {
-		// Dessiner la palette pour qu'elle soit horizontale
-		palet.rect = (120, 20);
-		// la placer en haut si x=2 et en bas si x=0
-		if (x == 2) {
-			palet.pos = (vec2(width()/2 + 40, height()+40));
-		} else {
-			palet.pos = (vec2(width()/2 - 40, height()-40));
-		};
-	// Si x impair, murs verticaux
-	} else if (x%2 == 1){
-		// Dessinner la palette verticalement
-		palet.rect= (20, 120);
-		// la placer à gauche si x=1 et droite si x=2
-		if (x == 1) {
-			//palet.pos = (vec2(), );
-		} else {
-
-		}
-	}
-	// Retourner la valeur entre 0 et 3
-	return(x);
-}
-
-function blueScreenOfDeath(timer){
-	play("error")
+function blueScreenOfDeathSpawn(){
+	console.log('oh no a blue screen');
+	play("error");
 
 	const errorScreen = add([
 			sprite("blueScreen"),
-			pos(0,0),
-			scale(.5),
+			origin("center"),
+			pos(width()/2,height()/2),
+			scale(.2),
 		])
 
-	let elapsed = 0;
-	let done = 0;
-	
-	while(done == 0){
-		if (elapsed < timer){
-			elapsed++;
-		}
-		else{
-			errorScreen.destroy();
-			elapsed = 0;
-			done = 1;
-		}
-	}
+	return errorScreen;
 }
 
-function polarBear(timer){
-	play("run")
+function polarBearSpawn(){
+	console.log('chased by a polar bear');
+	play("run");
 
 	const bear = add([
 			sprite("bear"),
+			origin("center"),
 			pos(width()/2,height()/2),
-			scale(.1),
+			scale(2.5),
 		])
 
-	let elapsed = 0;
-	let done = 0;
-	
-	while(done == 0){
-		if (elapsed < timer){
-			elapsed++;
-			bear.scale(.1*elapsed)
-		}
-		else{
-			bear.destroy();
-			elapsed = 0;
-			done = 1;
-		}
-	}
+	return bear;
+}
+
+function kill(object){
+	console.log('destroying object');
+	object.destroy();
+	return 0;
 }
 
 function moveBonus(bonusObj, wall){
