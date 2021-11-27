@@ -33,6 +33,8 @@ loadRoot("assets/")
 // charger les images
 loadSprite("tuile","images/tuile.png")
 loadSprite("coeur","images/coeur.png")
+loadSprite("bckg", "images/background/tiled.png")
+loadSprite("title", "images/title.gif")
 //malus
 loadSprite("blueScreen","images/malus/blueScreen.png")
 loadSprite("bear","images/malus/polar_bear.gif")
@@ -65,35 +67,28 @@ scene("accueil", () => {
 	// lancer la musique
 	const musique = play("musique")
 	add([
+		sprite("bckg"),
+		pos(0,0),
+	]);
+
+	add([
+		sprite("title"),
+		origin("center"),
+		pos(width()/2, 300),
+	]);
+
+	add([
 		// créer un objet texte
 		// le second paramètre permet de modifier son style
 		text("Appuyez sur la barre d'espace pour jouer !",{
-			width : 800
+			width : 600
 		}),
 		// placer le point d'accroche au centre
 		origin("center"),
 		// placer le texte au centre
-		pos(center()),
+		pos(width()/2,600),
 	]);
-	// ajout de plusieurs textes affichés aléatoirement
-	// ici, on lancer une boucle tooutes les ½ secondes
-	loop(0.5, () => {
-		add([
-			// le texte est tiré aléatoirement dans ce tableau
-			text(choose(["UNIL","EPFL","SLI","CDH","GAMELAB","Lettres"]),{
-				width : 800,
-				font : "sink",
-				size : 48
-			}),
-			// la couleur est ajoutée en rgb (red, green, blue)
-			// on tire à chaque fois nombre entre 0 et 255
-			// randi() garantit qu'il s'agit d'un entier
-			// au contraire de rand()
-			color(randi(0,255),randi(0,255),randi(0,255)),
-			origin("center"),
-			pos(randi(0,width()),randi(height()-10,height()-200)),
-		]);
-	})
+
 
 	// ajout d'un événement pour lancer l'autre scène
 	onKeyPress("space",() =>{
@@ -138,6 +133,10 @@ function deplacerPalette(mur) {
 
 // déclaration de la scène de jeu
 scene("jeu",() => {
+	add([
+		sprite("bckg"),
+		pos(0,0),
+	]);
 	// initialisation des variables globales
 	// score à zéro et vies à 3
 	let score = 0
@@ -431,10 +430,14 @@ scene("jeu",() => {
 		let malus = randi(0,2)
 		switch(malus){
 			case 0:
-				blueScreenOfDeath(1000);
+				running = 1;
+				errorScreen = blueScreenOfDeathSpawn()
+				wait(.5, () => kill(errorScreen))
 				break;
 			case 1:
-				polarBear(1000);
+				running = 1;
+				bear = polarBearSpawn();
+				wait(.5, () => kill(bear));
 				break;
 		}
 		b.destroy()
@@ -448,53 +451,38 @@ scene("jeu",() => {
 	})
 })
 
-function blueScreenOfDeath(timer){
-	play("error")
+function blueScreenOfDeathSpawn(){
+	console.log('oh no a blue screen');
+	play("error");
 
 	const errorScreen = add([
 			sprite("blueScreen"),
-			pos(0,0),
-			scale(.5),
+			origin("center"),
+			pos(width()/2,height()/2),
+			scale(.2),
 		])
 
-	let elapsed = 0;
-	let done = 0;
-	
-	while(done == 0){
-		if (elapsed < timer){
-			elapsed++;
-		}
-		else{
-			errorScreen.destroy();
-			elapsed = 0;
-			done = 1;
-		}
-	}
+	return errorScreen;
 }
 
-function polarBear(timer){
-	play("run")
+function polarBearSpawn(){
+	console.log('chased by a polar bear');
+	play("run");
 
 	const bear = add([
 			sprite("bear"),
+			origin("center"),
 			pos(width()/2,height()/2),
-			scale(.1),
+			scale(2.5),
 		])
 
-	let elapsed = 0;
-	let done = 0;
-	
-	while(done == 0){
-		if (elapsed < timer){
-			elapsed++;
-			bear.scale = 1*elapsed;
-		}
-		else{
-			bear.destroy();
-			elapsed = 0;
-			done = 1;
-		}
-	}
+	return bear;
+}
+
+function kill(object){
+	console.log('destroying object');
+	object.destroy();
+	return 0;
 }
 
 function moveBonus(bonusObj, wall){
