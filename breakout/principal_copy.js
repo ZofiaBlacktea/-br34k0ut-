@@ -22,8 +22,6 @@ kaboom({
 	height : 800
 })
 
-let palet;
-
 // définir un chemin racine pour les ressources
 // Ctte étape est facultative, elle sert juste
 // à raccourcir les chemins suivants
@@ -102,45 +100,6 @@ scene("accueil", () => {
 	})
 })
 
-// Définir la fonction deplacerPalette
-function deplacerPalette(x) {
-	// Si x pair, murs horizontaux
-	if (x%2 == 0) {
-		// Dessiner la palette pour qu'elle soit horizontale
-			palet.width = 120;
-			palet.height = 20;
-		// Lier le mouvement de la palette à l'axe x
-		onUpdate("paddle", (p) => {
-			p.pos.x = mousePos().x;
-		})
-
-		// la placer en haut si x=2 et en bas si x=0
-		if (x == 2) {
-			palet.pos = (vec2(width()/2 + 40, height()+40));
-		} else {
-			palet.pos = (vec2(width()/2 - 40, height()-40));
-		};
-	// Si x impair, murs verticaux
-	} else if (x%2 == 1){
-		// Dessinner la palette verticalement
-			palet.width = 20;
-			palet.height = 120;
-		// Lier le mouvement de la palette à l'axe y
-		onUpdate("paddle", (p) => {
-			p.pos.y = mousePos().y;
-		})
-
-		// la placer à gauche si x=1 et droite si x=2
-		if (x == 1) {
-			palet.pos = (vec2(width()-40, height()/2 - 40));
-		} else {
-			palet.pos = (vec2(width()+40, height()/2 + 40));
-		}
-	}
-	// Retourner la valeur entre 0 et 3
-	return(x);
-}
-
 // déclaration de la scène de jeu
 scene("jeu",() => {
 	// initialisation des variables globales
@@ -190,7 +149,7 @@ scene("jeu",() => {
 		]
 	})
 	// le palet
-	palet = add([
+	let palet = add([
 		pos(vec2(width()/2 - 40, height()-40)),
 		rect(120, 20),
 		outline(4),
@@ -294,8 +253,6 @@ scene("jeu",() => {
 			let x = randi(0, 4);
 			// appeler la fonction de changement de mur avec ce chiffre
 			deplacerPalette(x);
-			// réinitialiser le compteur
-			compteur = 0;
 		};
 		
 	})
@@ -303,7 +260,6 @@ scene("jeu",() => {
 	// avec tous les types de briques
 	// grâce à l'identifiant "brique"
 	ball.onCollide("brique", (b) => {
-		console.log("ball.onCollide brique");
 		let sfx = randi(0,4)
 		switch(sfx){
 			case 0:
@@ -327,7 +283,6 @@ scene("jeu",() => {
 	// avec les briques spéciales
 	// grâce à l'identifiant "special"
 	ball.onCollide("special", (b) => {
-		console.log("ball.onCollide special");
 		let malus = randi(0,2)
 		switch(malus){
 			case 0:
@@ -338,15 +293,35 @@ scene("jeu",() => {
 				break;
 		}
 		b.destroy()
-		/* // Kaboom ne gère que le rgb, mais des fonctions
-		// de conversions nous permettent d'utiliser du hsl !
-		palet.color = hsl2rgb((time() * 0.2 + 1 * 0.1) % 1, 0.7, 0.8)
-		// transformer aléatoirement la taille du palet
-		palet.width = randi(50,200)
-		palet.height = randi(20,100)
-		ball.velocite = dir(ball.pos.angle(b.pos)) */
 	})
 })
+
+// Définir la fonction deplacerPalette
+function deplacerPalette(x) {
+	// Si x pair, murs horizontaux
+	if (x%2 == 0) {
+		// Dessiner la palette pour qu'elle soit horizontale
+		palet.rect = (120, 20);
+		// la placer en haut si x=2 et en bas si x=0
+		if (x == 2) {
+			palet.pos = (vec2(width()/2 + 40, height()+40));
+		} else {
+			palet.pos = (vec2(width()/2 - 40, height()-40));
+		};
+	// Si x impair, murs verticaux
+	} else if (x%2 == 1){
+		// Dessinner la palette verticalement
+		palet.rect= (20, 120);
+		// la placer à gauche si x=1 et droite si x=2
+		if (x == 1) {
+			//palet.pos = (vec2(), );
+		} else {
+
+		}
+	}
+	// Retourner la valeur entre 0 et 3
+	return(x);
+}
 
 function blueScreenOfDeath(timer){
 	play("error")
