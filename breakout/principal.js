@@ -23,6 +23,7 @@ kaboom({
 })
 
 let palet;
+let mur = 0;
 
 // définir un chemin racine pour les ressources
 // Ctte étape est facultative, elle sert juste
@@ -103,42 +104,36 @@ scene("accueil", () => {
 })
 
 // Définir la fonction deplacerPalette
-function deplacerPalette(x) {
-	// Si x pair, murs horizontaux
-	if (x%2 == 0) {
+function deplacerPalette(mur) {
+	console.log("deplacerPalette activé");
+	// Si pair, murs horizontaux
+	if (mur%2 == 0) {
 		// Dessiner la palette pour qu'elle soit horizontale
 			palet.width = 120;
 			palet.height = 20;
-		// Lier le mouvement de la palette à l'axe x
-		onUpdate("paddle", (p) => {
-			p.pos.x = mousePos().x;
-		})
 
 		// la placer en haut si x=2 et en bas si x=0
-		if (x == 2) {
-			palet.pos = (vec2(width()/2 + 40, height()+40));
+		if (mur == 2) {
+			plaet.pos = (vec2(width()/2 - 40, height() - 760));
 		} else {
 			palet.pos = (vec2(width()/2 - 40, height()-40));
 		};
-	// Si x impair, murs verticaux
-	} else if (x%2 == 1){
+	// Si impair, murs verticaux
+	} else if (mur%2 == 1){
 		// Dessinner la palette verticalement
 			palet.width = 20;
 			palet.height = 120;
-		// Lier le mouvement de la palette à l'axe y
-		onUpdate("paddle", (p) => {
-			p.pos.y = mousePos().y;
-		})
 
 		// la placer à gauche si x=1 et droite si x=2
-		if (x == 1) {
-			palet.pos = (vec2(width()-40, height()/2 - 40));
+		if (mur == 1) {
+			palet.pos = (vec2(width()-760, height()/2 - 40));
 		} else {
-			palet.pos = (vec2(width()+40, height()/2 + 40));
+			palet.pos = (vec2(width()-40, height()/2 - 40));
 		}
 	}
-	// Retourner la valeur entre 0 et 3
-	return(x);
+	// Retourner la valeur dur mur (entre 0 et 3)
+	console.log("Position: ", palet.pos, "Mur: ", mur);
+	return(mur);
 }
 
 // déclaration de la scène de jeu
@@ -218,7 +213,11 @@ scene("jeu",() => {
 	// vérifier le mouvement du paddle 60 fois par
 	// seconde et y associer le mouvement de la souris
 	onUpdate("paddle", (p) => {
+		if (mur%2 == 0) {
 		p.pos.x = mousePos().x
+		} else {
+		p.pos.y = mousePos().y
+		}
 	})
 
 	// ajouter la balle
@@ -288,12 +287,13 @@ scene("jeu",() => {
 		ball.velocite = dir(ball.pos.angle(p.pos));
 		
 		compteur+=1;
+		console.log("compteur =", compteur);
 		// Si la balle a touché deux fois la palette
 		if (compteur == 2) {
 			// Générer un nombre entre 0 et 3
-			let x = randi(0, 4);
+			mur = randi(0, 4);
 			// appeler la fonction de changement de mur avec ce chiffre
-			deplacerPalette(x);
+			deplacerPalette(mur);
 			// réinitialiser le compteur
 			compteur = 0;
 		};
@@ -387,7 +387,7 @@ function polarBear(timer){
 	while(done == 0){
 		if (elapsed < timer){
 			elapsed++;
-			bear.scale(.1*elapsed)
+			bear.scale = 1*elapsed;
 		}
 		else{
 			bear.destroy();
@@ -425,6 +425,7 @@ scene("ohno", ({score}) => {
 		pos(center()),
 	]);
 	onKeyPress("space",() =>{
+		mur = 0;
 		go("accueil")
 	})
 })
