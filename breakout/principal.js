@@ -114,7 +114,7 @@ function deplacerPalette(mur) {
 
 		// la placer en haut si x=2 et en bas si x=0
 		if (mur == 2) {
-			plaet.pos = (vec2(width()/2 - 40, height() - 760));
+			palet.pos = (vec2(width()/2 - 40, height() - 760));
 		} else {
 			palet.pos = (vec2(width()/2 - 40, height()-40));
 		};
@@ -186,7 +186,7 @@ scene("jeu",() => {
 	})
 	// le palet
 	palet = add([
-		pos(vec2(width()/2 - 40, height()-40)),
+		pos(vec2(width()/2, height()-40)),
 		rect(120, 20),
 		outline(4),
 		origin("center"),
@@ -243,38 +243,138 @@ scene("jeu",() => {
 	// dès que la balle "change"
 	// on effectue un certain nombre de tests
 	ball.onUpdate(() => {
-		// déplacer la balle
-		ball.move(ball.velocite.scale(vitesse))
-		// gérer les rebonds sur les murs latéraux...
-		if (ball.pos.x < 0 || ball.pos.x > width()) {
-			// et renvoyer la balle
-			ball.velocite.x = -ball.velocite.x
-		}
-		// si la balle tape au sommet...
-		if(ball.pos.y < 0){
-			// elle repart dans l'autre sens
-			ball.velocite.y = -ball.velocite.y
-		}
-		// gérer le cas où la balle sort par le bas
-		if (ball.pos.y > height()+60) {
-			// secouer l'écran
-			shake(30)
-			play("echec")
-			// réinitialiser la balle, sa vitesse, etc.
-			ball.pos.x = width()/2
-			ball.pos.y = height()-55
-			vitesse = 320
-			ball.velocite = dir(rand(220,290))
-			// diminuer les vies
-			vies--
-			// s'il n'y en a plus...
-			if(vies==0){
-				// appel de la scène d'échec
-				// et passage d'un paramètre qui sera récupéré
-				// dans cette scène
-				go("ohno",{score : score})
+		if (mur == 0) {
+			// déplacer la balle
+			ball.move(ball.velocite.scale(vitesse))
+			// gérer les rebonds sur les murs latéraux...
+			if (ball.pos.x < 0 || ball.pos.x > width()) {
+				// et renvoyer la balle
+				ball.velocite.x = -ball.velocite.x
 			}
-
+			// si la balle tape au sommet...
+			if(ball.pos.y < 0){
+				// elle repart dans l'autre sens
+				ball.velocite.y = -ball.velocite.y
+			}
+			// gérer le cas où la balle sort par le bas
+			if (ball.pos.y > height()+60) {
+				// secouer l'écran
+				shake(30)
+				play("echec")
+				// réinitialiser la balle, sa vitesse, etc.
+				ball.pos.x = width()/2
+				ball.pos.y = height()-55
+				vitesse = 320
+				ball.velocite = dir(rand(220,290))
+				// diminuer les vies
+				vies--
+				// s'il n'y en a plus...
+				if(vies==0){
+					// appel de la scène d'échec
+					// et passage d'un paramètre qui sera récupéré
+					// dans cette scène
+					go("ohno",{score : score})
+				}
+			}
+		} else if (mur == 1) {
+			// déplacer la balle
+			ball.move(ball.velocite.scale(vitesse))
+			// gérer les rebonds sur le mur droit (3)...
+			if (ball.pos.x > width()) {
+				// et renvoyer la balle
+				ball.velocite.x = -ball.velocite.x
+			}
+			// si la balle tape en bas ou en haut...
+			if(ball.pos.y > width() || ball.pos.y < 0){
+				// elle repart dans l'autre sens
+				ball.velocite.y = -ball.velocite.y
+			}
+			// gérer le cas où la balle sort par la droite
+			if (ball.pos.x < -60) {
+				// secouer l'écran
+				shake(30)
+				play("echec")
+				// réinitialiser la balle, sa vitesse, etc.
+				ball.pos.x = width()/2
+				ball.pos.y = height()-55
+				vitesse = 320
+				ball.velocite = dir(rand(220,290))
+				// diminuer les vies
+				vies--
+				// s'il n'y en a plus...
+				if(vies==0){
+					// appel de la scène d'échec
+					// et passage d'un paramètre qui sera récupéré
+					// dans cette scène
+					go("ohno",{score : score})
+				}
+			}
+		} else if (mur == 2) {
+			// déplacer la balle
+			ball.move(ball.velocite.scale(vitesse))
+			// gérer les rebonds sur les murs latéraux...
+			if (ball.pos.x < 0 || ball.pos.x > width()) {
+				// et renvoyer la balle
+				ball.velocite.x = -ball.velocite.x
+			}
+			// si la balle tape en bas...
+			if(ball.pos.y > height()){
+				// elle repart dans l'autre sens
+				ball.velocite.y = -ball.velocite.y
+			}
+			// gérer le cas où la balle sort par le haut
+			if (ball.pos.y < -60) {
+				// secouer l'écran
+				shake(30)
+				play("echec")
+				// réinitialiser la balle, sa vitesse, etc.
+				ball.pos.x = width()/2
+				ball.pos.y = height()-55
+				vitesse = 320
+				ball.velocite = dir(rand(220,290))
+				// diminuer les vies
+				vies--
+				// s'il n'y en a plus...
+				if(vies==0){
+					// appel de la scène d'échec
+					// et passage d'un paramètre qui sera récupéré
+					// dans cette scène
+					go("ohno",{score : score})
+				}
+			}
+		} else if (mur == 3) {
+			// déplacer la balle
+			ball.move(ball.velocite.scale(vitesse))
+			// gérer les rebonds sur le mur gauche (1)...
+			if (ball.pos.x < 0) {
+				// et renvoyer la balle
+				ball.velocite.x = -ball.velocite.x
+			}
+			// si la balle tape en bas ou en haut...
+			if(ball.pos.y > height() || ball.pos.y < 0){
+				// elle repart dans l'autre sens
+				ball.velocite.y = -ball.velocite.y
+			}
+			// gérer le cas où la balle sort par la droite
+			if (ball.pos.x > width()) {
+				// secouer l'écran
+				shake(30)
+				play("echec")
+				// réinitialiser la balle, sa vitesse, etc.
+				ball.pos.x = width()/2
+				ball.pos.y = height()-55
+				vitesse = 320
+				ball.velocite = dir(rand(220,290))
+				// diminuer les vies
+				vies--
+				// s'il n'y en a plus...
+				if(vies==0){
+					// appel de la scène d'échec
+					// et passage d'un paramètre qui sera récupéré
+					// dans cette scène
+					go("ohno",{score : score})
+				}
+			}
 		}
 	})
 
