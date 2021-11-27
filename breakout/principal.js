@@ -242,13 +242,13 @@ scene("jeu",() => {
 	ball.onCollide("special", (b) => {
 		play("reussite")
 		b.destroy()
-		// Kaboom ne gère que le rgb, mais des fonctions
+		/* // Kaboom ne gère que le rgb, mais des fonctions
 		// de conversions nous permettent d'utiliser du hsl !
 		palet.color = hsl2rgb((time() * 0.2 + 1 * 0.1) % 1, 0.7, 0.8)
 		// transformer aléatoirement la taille du palet
 		palet.width = randi(50,200)
 		palet.height = randi(20,100)
-		ball.velocite = dir(ball.pos.angle(b.pos))
+		ball.velocite = dir(ball.pos.angle(b.pos)) */
 	})
 })
 
