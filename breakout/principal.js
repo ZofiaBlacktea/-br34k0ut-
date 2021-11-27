@@ -18,7 +18,7 @@ Isaac Pante
 // définissez les propriétés générales ici
 kaboom({
 	background: [0,0,0],
-	width : 1200,
+	width : 800,
 	height : 800
 })
 
@@ -98,8 +98,8 @@ scene("jeu",() => {
 		"=xxx=x==x=xxx=",
 	], {
 		// définir la taille de chaque élément
-		width : 65,
-		height : 33,
+		width : 50,
+		height : 50,
 		// définir où positionner le début de la grille
 		pos : vec2(100, 200),
 		// associer chaque symbole à un composant
